@@ -4,19 +4,19 @@ from byplay.recording_local_storage import RecordingLocalStorage
 from byplay.blender_scene_loader import BlenderSceneLoader
 
 
+def _get_recording_ids_search(_scene, _context):
+    return list(
+        reversed(
+            sorted(
+                map(lambda x: (x, x, ""), RecordingLocalStorage().list_recording_ids())
+            )
+        )
+    )
+
+
 class ByplayImportOperator(bpy.types.Operator):
     bl_idname = "object.byplay_import_operator"
     bl_label = "Byplay"
-
-    @staticmethod
-    def _get_recording_ids_search(_scene, _context):
-        return list(
-            reversed(
-                sorted(
-                    map(lambda x: (x, x, ""), RecordingLocalStorage().list_recording_ids())
-                )
-            )
-        )
 
     recording_id: bpy.props.EnumProperty(name="Recording id", items=_get_recording_ids_search)
     create_compositing_nodes: bpy.props.BoolProperty(name="Create compositing nodes", default=True)
@@ -50,17 +50,3 @@ class ByplayImportOperator(bpy.types.Operator):
         row.prop(self, "create_compositing_nodes")
         row = col.row()
         row.prop(self, "use_exr")
-
-    @staticmethod
-    def menu_func(self, context):
-        self.layout.operator(ByplayImportOperator.bl_idname, text="Byplay Camera Recording")
-
-    @staticmethod
-    def register():
-        bpy.utils.register_class(ByplayImportOperator)
-        bpy.types.TOPBAR_MT_file_export.append(ByplayImportOperator.menu_func)
-
-    @staticmethod
-    def unregister():
-        bpy.utils.unregister_class(ByplayImportOperator)
-        bpy.types.TOPBAR_MT_file_export.remove(ByplayImportOperator.menu_func)
