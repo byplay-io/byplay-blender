@@ -7,6 +7,10 @@ class Config:
     _recordings_dir = None
 
     @staticmethod
+    def mute_amplitude() -> bool:
+        return False
+
+    @staticmethod
     def is_dev() -> bool:
         return False
 
@@ -21,10 +25,6 @@ class Config:
     @staticmethod
     def recordings_dir() -> str:
         return Config._recordings_dir
-
-    @staticmethod
-    def current_package_version() -> str:
-        return "Blender:0.1.0-{}".format(sys.platform)
 
     @staticmethod
     def user_config_path():

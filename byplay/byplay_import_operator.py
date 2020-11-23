@@ -1,5 +1,6 @@
 #  exec(open("/Users/vadim/projects/byplay/byplay-blender/io_import_byplay_scene.py").read())
 import bpy
+import logging
 from byplay.recording_local_storage import RecordingLocalStorage
 from byplay.blender_scene_loader import BlenderSceneLoader
 
@@ -23,17 +24,25 @@ class ByplayImportOperator(bpy.types.Operator):
     use_exr: bpy.props.BoolProperty(name="Set EXR environment", default=True)
 
     def execute(self, context):
+        logging.info(
+            "Executing, rec id: {}, ccn: {}, exr: {}".format(
+                self.recording_id,
+                self.create_compositing_nodes,
+                self.use_exr
+            )
+        )
         loader = BlenderSceneLoader(
             recording_id=self.recording_id,
             context=context,
             report=self.report
         )
-        loader.load_scene()
+        loader.load_scene(with_compositing=self.create_compositing_nodes)
         if self.create_compositing_nodes:
             loader.load_compositing()
         if self.use_exr:
             loader.load_exrs()
         self.report({'INFO'}, "Loaded recording {}".format(self.recording_id))
+        logging.info("Success loaded " + self.recording_id)
 
         return {'FINISHED'}
 
