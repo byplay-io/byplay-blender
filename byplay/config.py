@@ -1,6 +1,7 @@
 import json
 import os
 import logging
+from byplay.version import VERSION
 from distutils.dir_util import mkpath
 
 class Config:
@@ -17,7 +18,7 @@ class Config:
 
     @staticmethod
     def build() -> str:
-        return 1001
+        return VERSION
 
     @staticmethod
     def user_id() -> str:
