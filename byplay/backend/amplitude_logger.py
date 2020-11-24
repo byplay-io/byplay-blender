@@ -1,5 +1,6 @@
 import time
 import json
+import logging
 
 from byplay.backend.async_post import async_post
 from byplay.backend.sys_info import sys_info
@@ -54,11 +55,11 @@ class AmplitudeLogger:
             event["event_properties"] = event_properties
 
         sys = sys_info()
-        event["platform"] = "Houdini plugin"
+        event["platform"] = "Blender plugin"
         event["os_name"] = sys["os.name"]
         event["os_version"] = sys["os.version"]
-        event["app_version"] = "houdini-plugin:{}".format(Config.build())
-        event["device_model"] = "houdini:{}:{}".format(sys["houdini.version"], sys["houdini.platform"])
+        event["app_version"] = "blender-plugin:{}".format(Config.build())
+        event["device_model"] = "blender:{}".format(sys["blender.version"])
 
         event_package = [
             ('api_key', self.api_key),
@@ -83,12 +84,13 @@ AMPLITUDE = AmplitudeLogger(api_key="5e18757a01b9d84a19dfddb7f0835a28")
 
 
 def log_amplitude(event_type, **props):
+    logging.info("AMP: {} {}".format(event_type, props))
+
     global AMPLITUDE
     if Config.mute_amplitude():
         return
     AMPLITUDE.log_event(
         AMPLITUDE.create_event(
-            device_id="blender-plugin",
             event_type=event_type,
             user_id=Config.user_id(),
             event_properties=props

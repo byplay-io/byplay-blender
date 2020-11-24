@@ -5,6 +5,7 @@ from distutils.dir_util import mkpath
 
 class Config:
     _recordings_dir = None
+    _user_id = None
 
     @staticmethod
     def mute_amplitude() -> bool:
@@ -16,10 +17,12 @@ class Config:
 
     @staticmethod
     def build() -> str:
-        return 1003
+        return 1001
 
     @staticmethod
     def user_id() -> str:
+        if Config._user_id is None:
+            Config.read()
         return Config._user_id
 
     @staticmethod
@@ -36,17 +39,18 @@ class Config:
 
     @staticmethod
     def _read_config_file():
+        config_path = Config.user_config_path()
         try:
-           config_path = Config.user_config_path()
-           if os.path.exists(config_path):
-               with open(config_path, encoding="utf-8") as f:
-                   logging.debug("Successfully read config file")
-                   return json.loads(f.read())
+            if os.path.exists(config_path):
+                with open(config_path, encoding="utf-8") as f:
+                    logging.debug("Successfully read config file")
+                    return json.loads(f.read())
+            else:
+                raise ValueError("User config doesn't exist at {}".format(config_path))
         except Exception as e:
             logging.error("exception while reading config {}".format(config_path))
             logging.exception(e)
-            return {}
-        return {}
+            return {'error': str(e)}
 
     @staticmethod
     def read():
@@ -56,7 +60,6 @@ class Config:
         Config._recordings_dir = data.get("recordingsDir")
         if Config._recordings_dir is None:
             raise ValueError("Recordings dir is empty in config {}".format(data))
-
 
     @staticmethod
     def setup_logger():

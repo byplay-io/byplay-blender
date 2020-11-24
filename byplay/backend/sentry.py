@@ -15,14 +15,24 @@ def generate_random_key(length):
     return ''.join(random.choice('0123456789abcdef') for _ in range(length))
 
 
-STORE_URL = "https://o244219.ingest.sentry.io/api/5394343/store/"
+STORE_URL = "https://o244219.ingest.sentry.io/api/5530947/store/"
 AUTH = """Sentry sentry_version=7,
 sentry_timestamp={timestamp},
-sentry_key=e6f05e834cb94683bff4831201c2b719,
+sentry_key=7c3247f0e9614dd0a853f2ac89e4505d,
 sentry_client=byplay-blender-python/1.0""".replace("\n", "")
 
 
+def _try_user_id():
+    try:
+        return Config.user_id()
+    except Exception as e:
+        print(e)
+        logging.error(e)
+        return "[unk]"
+
+
 def capture_exception():
+    logging.info("Capturing exception")
     exc_type, exc_value, exc_traceback = sys.exc_info()
     logging.error(exc_value)
     try:
@@ -34,12 +44,12 @@ def capture_exception():
             'dist': Config.build(),
             'tags': sys_info(),
             'user': {
-                'id': Config.user_id(),
+                'id': _try_user_id(),
             },
             "exception": {
                 "values": [{
                     "type": exc_type.__name__,
-                    "value": exc_value.message,
+                    "value": ", ".join(exc_value.args),
                     "stacktrace": {
                         "frames": list(
                             map(
@@ -61,5 +71,6 @@ def capture_exception():
             json=payload
         )
     except Exception as sending_exception:
+        print(sending_exception)
         # raise sending_exception
         logging.error(sending_exception)

@@ -1,18 +1,25 @@
 #  exec(open("/Users/vadim/projects/byplay/byplay-blender/io_import_byplay_scene.py").read())
 import bpy
 import logging
+
+from byplay.backend.amplitude_logger import log_amplitude
+from byplay.backend.sentry import capture_exception
 from byplay.recording_local_storage import RecordingLocalStorage
 from byplay.blender_scene_loader import BlenderSceneLoader
 
 
 def _get_recording_ids_search(_scene, _context):
-    return list(
-        reversed(
-            sorted(
-                map(lambda x: (x, x, ""), RecordingLocalStorage().list_recording_ids())
+    try:
+        return list(
+            reversed(
+                sorted(
+                    map(lambda x: (x, x, ""), RecordingLocalStorage().list_recording_ids())
+                )
             )
         )
-    )
+    except Exception as e:
+        capture_exception()
+        raise e
 
 
 class ByplayImportOperator(bpy.types.Operator):
@@ -23,7 +30,8 @@ class ByplayImportOperator(bpy.types.Operator):
     create_compositing_nodes: bpy.props.BoolProperty(name="Create compositing nodes", default=True)
     use_exr: bpy.props.BoolProperty(name="Set EXR environment", default=True)
 
-    def execute(self, context):
+    def _import_recording(self, context):
+        log_amplitude("Blender import operator executed", recording_id=self.recording_id)
         logging.info(
             "Executing, rec id: {}, ccn: {}, exr: {}".format(
                 self.recording_id,
@@ -44,13 +52,25 @@ class ByplayImportOperator(bpy.types.Operator):
         self.report({'INFO'}, "Loaded recording {}".format(self.recording_id))
         logging.info("Success loaded " + self.recording_id)
 
+    def execute(self, context):
+        try:
+            self._import_recording(context)
+        except Exception as e:
+            capture_exception()
+            raise e
+
         return {'FINISHED'}
 
     def invoke(self, context, _event):
-        wm = context.window_manager
-        return wm.invoke_props_dialog(self)
+        try:
+            wm = context.window_manager
+            log_amplitude("Blender import operator opened")
+            return wm.invoke_props_dialog(self)
+        except Exception as e:
+            capture_exception()
+            raise e
 
-    def draw(self, context):
+    def _draw(self, _context):
         layout = self.layout
         col = layout.column()
         col.label(text="Importing a Byplay recording")
@@ -59,3 +79,10 @@ class ByplayImportOperator(bpy.types.Operator):
         row.prop(self, "create_compositing_nodes")
         row = col.row()
         row.prop(self, "use_exr")
+
+    def draw(self, context):
+        try:
+            self._draw(context)
+        except Exception as e:
+            capture_exception()
+            raise e
