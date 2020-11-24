@@ -17,7 +17,7 @@ import logging
 os.environ["BYPLAY_SYSTEM_DATA_PATH"] = "/Users/vadim/Library/Application Support/Byplay Desktop/preferences.json"
 os.environ["BYPLAY_PLUGIN_LOG_PATH"] = "/Users/vadim/Library/Application Support/Byplay Desktop/blender.log"
 
-byplay_plugin_path = "/Users/vadim/projects/byplay/byplay-blender"
+byplay_plugin_path = "/"
 
 if byplay_plugin_path not in sys.path:
     sys.path.append(byplay_plugin_path)

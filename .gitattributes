@@ -1,0 +1,3 @@
+.git*           export-ignore
+testing         export-ignore
+compile_package.sh export-ignore
