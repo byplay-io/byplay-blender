@@ -1,4 +1,4 @@
 #!/bin/bash
 
-rm package.zip
-zip -r package.zip addon_template.py  byplay/**/*.py
+echo "VERSION = '$1'" > byplay/version.py
+zip -r package.zip byplay/**/*.py
