@@ -53,24 +53,18 @@ class BlenderSceneLoader:
             self.report({'INFO'}, "No exrs found")
             return
 
-        existing = set([n for n in bpy.data.images])
-        for exr_path in exrs:
-            bpy.ops.image.open(filepath=exr_path)
-
-        newly_added = set([n for n in bpy.data.images]).difference(existing)
         loaded = []
-        for i in newly_added:
+        for exr_path in exrs:
+            i = bpy.data.images.load(exr_path, check_existing=True)
             i.name = "ENV_{}_{}".format(self.recording_id, i.name)
-            loaded.append(i.name)
+            self.report({'INFO'}, "Got exr {}".format(i.name))
+            loaded.append(i)
 
-        some_exr = None
-        for img in bpy.data.images:
-            if img.filepath in exrs:
-                some_exr = img
-                break
-
-        if some_exr is None:
+        if len(loaded) == 0:
+            self.report({'INFO'}, "Didn't find any exrs")
             return
+
+        some_exr = loaded[0]
 
         self.report({'INFO'}, "Loaded exr images: {}; setting {} as world environment".format(loaded, some_exr.name))
         world = self.context.scene.world
