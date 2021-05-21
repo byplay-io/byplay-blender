@@ -13,8 +13,11 @@ class RecordingLocalStorage:
         return list(sorted(extracted))
 
     def blend_path(self, recording_id):
-        blend_file_name = "byplay_{}.blend".format(recording_id)
-        return join(self.full_path(recording_id), blend_file_name)
+        legacy_path = join(self.full_path(recording_id), "byplay_{}.blend".format(recording_id))
+        ar_path = join(self.full_path(recording_id), "byplay_{}_ar_v1.blend".format(recording_id))
+        if os.path.exists(ar_path):
+            return ar_path
+        return legacy_path
 
     def list_env_exr_paths(self, recording_id):
         assets_path = join(Config.recordings_dir(), recording_id, 'assets')
